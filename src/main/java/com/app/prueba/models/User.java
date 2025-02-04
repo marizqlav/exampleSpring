@@ -48,7 +48,7 @@ public class User {
     @Column(name = "username", unique = true)
     @NotNull(message = "User name cannot be null")
     @NotBlank(message = "User name cannot be blank")
-    @Length(min = 3, max = 50, message = "Last name must be between 3 and 50 characters")
+    @Length(min = 3, max = 50, message = "User name must be between 3 and 50 characters")
     private String username;
     
 
