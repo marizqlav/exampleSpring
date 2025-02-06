@@ -15,6 +15,12 @@ import com.app.prueba.models.User;
 import com.app.prueba.services.UserService;
 import com.app.prueba.validations.ValidateUser;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,10 +33,19 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("api/users")
+@Tag(name = "Users", description = "The User API")
 public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Operation(summary = "Get all users", description = "Get all users in the database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Users found", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = User.class, type = "array")) }),
+            @ApiResponse(responseCode = "404", description = "No users found", content = {
+                    @Content(mediaType = "application/json") })
+    })
 
     @GetMapping
     public ResponseEntity<?> getUsers() {
@@ -38,12 +53,19 @@ public class UserController {
         if (users.isEmpty()) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "No users found");
-            return new ResponseEntity<>(errorResponse, HttpStatus.OK);
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
 
         }
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }
 
+    @Operation(summary = "Get user by id", description = "Get a user by its id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User found", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)) }),
+            @ApiResponse(responseCode = "404", description = "User not found", content = {
+                    @Content(mediaType = "application/json") })
+    })
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable int id) {
         User user = userService.getUserById(id);
@@ -55,6 +77,15 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    @Operation(summary = "Create a new user", description = "Create a new user in the database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User created", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)) }),
+            @ApiResponse(responseCode = "409", description = "Conflict", content = {
+                    @Content(mediaType = "application/json") }),
+            @ApiResponse(responseCode = "400", description = "Bad request", content = {
+                    @Content(mediaType = "application/json") })
+    })
     @PostMapping
     public ResponseEntity<?> createUser(@Valid @RequestBody User user, BindingResult bindingResult) {
         ValidateUser uniqueUser = new ValidateUser();
@@ -69,6 +100,18 @@ public class UserController {
             return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
         }
     }
+
+    @Operation(summary = "Update a user", description = "Update a user in the database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)) }),
+            @ApiResponse(responseCode = "404", description = "User not found", content = {
+                    @Content(mediaType = "application/json") }),
+            @ApiResponse(responseCode = "400", description = "Bad request", content = {
+                    @Content(mediaType = "application/json") }),
+            @ApiResponse(responseCode = "409", description = "Conflict", content = {
+                    @Content(mediaType = "application/json") })
+    })
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable int id, @Valid @RequestBody User user,
@@ -96,8 +139,15 @@ public class UserController {
             errorResponse.put("error", e.getMostSpecificCause().getMessage().split("Detail: ")[1]);
             return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
         }
-
     }
+
+    @Operation(summary = "Delete a user", description = "Delete a user in the database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "User deleted", content = {
+                    @Content(mediaType = "application/json") }),
+            @ApiResponse(responseCode = "404", description = "User not found", content = {
+                    @Content(mediaType = "application/json") })
+    })
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable int id) {
@@ -110,5 +160,23 @@ public class UserController {
         userService.deleteUser(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    // @Operation(summary = "Get cards by user id", description = "Get all cards by user id")
+    // @ApiResponses(value = {
+    //         @ApiResponse(responseCode = "200", description = "Cards found", content = {
+    //                 @Content(mediaType = "application/json", schema = @Schema(implementation = Cards.class, type = "array")) }),
+    //         @ApiResponse(responseCode = "404", description = "No cards found", content = {
+    //                 @Content(mediaType = "application/json") })
+    // })
+    // @GetMapping("/{id}/cards")
+    // public ResponseEntity<?> getCardsByUserId(@PathVariable int id) {
+    //     List<Cards> cards = userService.findCardsByUserId(id);
+    //     if (cards.isEmpty()) {
+    //         Map<String, String> errorResponse = new HashMap<>();
+    //         errorResponse.put("error", "No cards found");
+    //         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    //     }
+    //     return new ResponseEntity<>(cards, HttpStatus.OK);
+    // }
 
 }

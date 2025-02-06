@@ -6,20 +6,32 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+public class SecurityConfig implements WebMvcConfigurer {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable()).authorizeHttpRequests((requests) -> requests
-                .requestMatchers(HttpMethod.GET, "/", "api/users", "api/users/").permitAll()
-                .requestMatchers(HttpMethod.POST, "/", "api/users", "api/auth/*").permitAll()
-                .requestMatchers(HttpMethod.PUT, "/", "api/users/").permitAll()
-                .requestMatchers(HttpMethod.DELETE, "/", "api/users/*").permitAll());
+                // Swagger
+                .requestMatchers("/v3/api-docs/**").permitAll()
+                .requestMatchers("/swagger-ui.html").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
+                // API
+                .requestMatchers(HttpMethod.GET, "/", "/api/users", "/api/users/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/", "/api/users", "/api/auth/**").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/", "/api/users/").permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/", "/api/users/*").permitAll());
 
         return http.build();
+    }
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addRedirectViewController("/", "/swagger-ui.html");
     }
 
 }
