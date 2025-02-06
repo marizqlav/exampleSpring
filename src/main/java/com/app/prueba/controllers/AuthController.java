@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.app.prueba.models.User;
 import com.app.prueba.services.AuthService;
-import com.app.prueba.validations.ValidateUser;
+import com.app.prueba.validations.ValidateEntity;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -46,7 +46,7 @@ public class AuthController {
 
     @PostMapping("register")
     public ResponseEntity<?> register(@Valid @RequestBody User user, BindingResult bindingResult) {
-        ValidateUser uniqueUser = new ValidateUser();
+        ValidateEntity uniqueUser = new ValidateEntity();
         if (uniqueUser.getErrorResponse(bindingResult) != null) {
             return uniqueUser.getErrorResponse(bindingResult);
         }

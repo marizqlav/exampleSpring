@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
-public class ValidateUser{
+public class ValidateEntity {
 
     public ResponseEntity<?> getErrorResponse(BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {

@@ -11,9 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.app.prueba.models.Cards;
 import com.app.prueba.models.User;
+import com.app.prueba.models.UserCards;
 import com.app.prueba.services.UserService;
-import com.app.prueba.validations.ValidateUser;
+import com.app.prueba.validations.ValidateEntity;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -88,7 +90,7 @@ public class UserController {
     })
     @PostMapping
     public ResponseEntity<?> createUser(@Valid @RequestBody User user, BindingResult bindingResult) {
-        ValidateUser uniqueUser = new ValidateUser();
+        ValidateEntity uniqueUser = new ValidateEntity();
         if (uniqueUser.getErrorResponse(bindingResult) != null) {
             return uniqueUser.getErrorResponse(bindingResult);
         }
@@ -122,7 +124,7 @@ public class UserController {
             errorResponse.put("error", "User not found");
             return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
         }
-        ValidateUser uniqueUser = new ValidateUser();
+        ValidateEntity uniqueUser = new ValidateEntity();
         if (uniqueUser.getErrorResponse(bindingResult) != null) {
             return uniqueUser.getErrorResponse(bindingResult);
         }
@@ -161,22 +163,48 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    // @Operation(summary = "Get cards by user id", description = "Get all cards by user id")
-    // @ApiResponses(value = {
-    //         @ApiResponse(responseCode = "200", description = "Cards found", content = {
-    //                 @Content(mediaType = "application/json", schema = @Schema(implementation = Cards.class, type = "array")) }),
-    //         @ApiResponse(responseCode = "404", description = "No cards found", content = {
-    //                 @Content(mediaType = "application/json") })
-    // })
-    // @GetMapping("/{id}/cards")
-    // public ResponseEntity<?> getCardsByUserId(@PathVariable int id) {
-    //     List<Cards> cards = userService.findCardsByUserId(id);
-    //     if (cards.isEmpty()) {
-    //         Map<String, String> errorResponse = new HashMap<>();
-    //         errorResponse.put("error", "No cards found");
-    //         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-    //     }
-    //     return new ResponseEntity<>(cards, HttpStatus.OK);
-    // }
+    @Operation(summary = "Get cards by user id", description = "Get all cards by user id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cards found", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = Cards.class, type = "array")) }),
+            @ApiResponse(responseCode = "404", description = "No cards found", content = {
+                    @Content(mediaType = "application/json") })
+    })
+    @GetMapping("/{id}/cards")
+    public ResponseEntity<?> getCardsByUserId(@PathVariable int id) {
+        List<Cards> cards = userService.findCardsByUserId(id);
+        if (cards.isEmpty()) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "No cards found");
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(cards, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Add card to user", description = "Add a card to a user by their IDs")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Card added to user", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = UserCards.class)) }),
+            @ApiResponse(responseCode = "404", description = "User or card not found", content = {
+                    @Content(mediaType = "application/json") })
+    })
+    @PostMapping("/{userId}/cards")
+    public ResponseEntity<?> addCardToUser(@PathVariable int userId, @Valid @RequestBody Cards card,
+            BindingResult bindingResult) {
+
+        ValidateEntity uniqueCard = new ValidateEntity();
+        if (uniqueCard.getErrorResponse(bindingResult) != null) {
+            return uniqueCard.getErrorResponse(bindingResult);
+        }
+
+        try {
+            UserCards userCards = userService.addCardToUser(userId, card);
+            return new ResponseEntity<>(userCards, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        }
+    }
 
 }

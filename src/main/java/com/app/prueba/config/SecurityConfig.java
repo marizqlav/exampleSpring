@@ -22,9 +22,9 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .requestMatchers("/swagger-ui/**").permitAll()
                 // API
                 .requestMatchers(HttpMethod.GET, "/", "/api/users", "/api/users/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/", "/api/users", "/api/auth/**").permitAll()
-                .requestMatchers(HttpMethod.PUT, "/", "/api/users/").permitAll()
-                .requestMatchers(HttpMethod.DELETE, "/", "/api/users/*").permitAll());
+                .requestMatchers(HttpMethod.POST, "/", "/api/users", "/api/users/**", "/api/auth/**").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/", "/api/users/", "/api/users/**").permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/", "/api/users/*", "/api/users/**").permitAll());
 
         return http.build();
     }

@@ -30,7 +30,6 @@ public class Cards {
     private String name;
 
     @Column(name = "description")
-
     private String description;
 
 }

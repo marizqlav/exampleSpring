@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 
 import com.app.prueba.models.Cards;
 import com.app.prueba.models.User;
+import com.app.prueba.models.UserCards;
+import com.app.prueba.repositories.CardRepository;
+import com.app.prueba.repositories.UserCardsRepository;
 import com.app.prueba.repositories.UserRepository;
 
 @Service
@@ -14,6 +17,12 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private CardRepository cardRepository;
+
+    @Autowired
+    private UserCardsRepository userCardsRepository;
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -48,7 +57,7 @@ public class UserService {
     }
 
     public List<Cards> findCardsByUserId(int userId) {
-        return userRepository.findCardsByUserId(userId);
+        return cardRepository.findCardsByUserId(userId);
     }
 
     public User getUserByEmail(String email) {
@@ -57,5 +66,14 @@ public class UserService {
 
     public User findUserByEmailAndPassword(String email, String password) {
         return userRepository.findUserByEmailAndPassword(email, password);
+    }
+
+    public UserCards addCardToUser(int userId, Cards cards) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("Invalid user id"));
+        Cards card = cardRepository.save(cards);
+        UserCards userCard = new UserCards();
+        userCard.setUser(user);
+        userCard.setCard(card);
+        return userCardsRepository.save(userCard);
     }
 }
