@@ -68,12 +68,12 @@ public class UserService {
         return userRepository.findUserByEmailAndPassword(email, password);
     }
 
-    public UserCards addCardToUser(int userId, Cards cards) {
+    public UserCards addCardToUser(int userId, Cards card) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("Invalid user id"));
-        Cards card = cardRepository.save(cards);
-        UserCards userCard = new UserCards();
-        userCard.setUser(user);
-        userCard.setCard(card);
-        return userCardsRepository.save(userCard);
+        Cards saveCard = cardRepository.save(card);
+        UserCards userCards = new UserCards();
+        userCards.setUser(user);
+        userCards.setCard(saveCard);
+        return userCardsRepository.save(userCards);
     }
 }
